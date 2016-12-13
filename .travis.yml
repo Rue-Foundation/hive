@@ -10,4 +10,4 @@ services:
 
 script:
   - go build && go install
-  - hive --client=ethereumj:master --docker-noshell --smoke=true --test=.
+  - hive --client=ethereumj:master --docker-noshell --smoke=true --test=. --loglevel=10
