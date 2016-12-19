@@ -9,5 +9,6 @@ services:
   - docker
 
 script:
+  - mkdir -p workspace/logs
   - go build && go install
   - hive --client=ethereumj:master --docker-noshell --smoke=false --test=.
