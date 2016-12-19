@@ -23,6 +23,6 @@ env:
 script:
   - mkdir -p workspace/logs
   - go build && go install
-  - hive --client=ethereumj:master --docker-noshell --smoke=false --test=. --loglevel=10
+  - hive --client=ethereumj:master --docker-noshell --smoke=false --test=.
   - mkdir -p $(dirname ${DOCKER_CACHE_FILE}) ; docker save $(docker history -q ${DOCKER_REPOSITORY}:${TRAVIS_COMMIT} | grep -v '<missing>') | gzip > ${DOCKER_CACHE_FILE};
 
