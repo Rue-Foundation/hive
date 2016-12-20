@@ -105,6 +105,8 @@ fi
 
 # Run the go-ethereum implementation with the requested flags
 echo "Running Harmony..."
+tar -C / -xf /harmony.ether.camp.tar
+echo "Extracted tar..."
 export HARMONY_ETHER_CAMP_OPTS=$FLAGS
-echo "HARMONY_ETHER_CAMP_OPTS: $HARMONY_ETHER_CAMP_OPTS"
+echo "Options: $HARMONY_ETHER_CAMP_OPTS"
 /harmony.ether.camp/bin/harmony.ether.camp
