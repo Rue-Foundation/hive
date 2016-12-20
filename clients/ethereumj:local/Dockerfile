@@ -1,4 +1,4 @@
-# Docker container spec for building the master branch of go-ethereum.
+# Docker container spec for building the master branch of ethereumJ.
 #
 # The build process it potentially longer running but every effort was made to
 # produce a very minimalistic container that can be reused many times without

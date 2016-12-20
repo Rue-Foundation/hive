@@ -106,4 +106,5 @@ fi
 # Run the go-ethereum implementation with the requested flags
 echo "Running Harmony..."
 export HARMONY_ETHER_CAMP_OPTS=$FLAGS
+echo "HARMONY_ETHER_CAMP_OPTS: $HARMONY_ETHER_CAMP_OPTS"
 /harmony.ether.camp/bin/harmony.ether.camp
