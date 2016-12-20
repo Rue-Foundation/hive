@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Startup script to initialize and boot a go-ethereum instance.
+# Startup script to initialize and boot a peer instance.
 #
 # This script assumes the following files:
-#  - `geth` binary is located in the filesystem root
+#  - `ethereum-harmony` folder is located in the filesystem root
 #  - `genesis.json` file is located in the filesystem root (mandatory)
 #  - `chain.rlp` file is located in the filesystem root (optional)
 #  - `blocks` folder is located in the filesystem root (optional)
@@ -114,7 +114,7 @@ if [ "$HIVE_MINER_EXTRA" != "" ]; then
 	FLAGS="$FLAGS -Dmine.extraData=$HIVE_MINER_EXTRA"
 fi
 
-# Run the go-ethereum implementation with the requested flags
+# Run the peer implementation with the requested flags
 echo "Parameters $FLAGS"
 echo "Running Harmony..."
 cd /ethereum-harmony

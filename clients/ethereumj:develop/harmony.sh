@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Startup script to initialize and boot a peer instance.
+# Startup script to initialize and boot a node instance.
 #
 # This script assumes the following files:
-#  - `geth` binary is located in the filesystem root
+#  - `ethereum-harmony` folder is located in the filesystem root
 #  - `genesis.json` file is located in the filesystem root (mandatory)
 #  - `chain.rlp` file is located in the filesystem root (optional)
 #  - `blocks` folder is located in the filesystem root (optional)
@@ -25,25 +25,29 @@ set -e
 # It doesn't make sense to dial out, use only a pre-set bootnode
 if [ "$HIVE_BOOTNODE" != "" ]; then
 	FLAGS="$FLAGS --bootnodes $HIVE_BOOTNODE"
+	echo "Missing --bootnodes impl"
 else
 	FLAGS="$FLAGS -Ddiscovery.enabled=false"
 fi
 
 # If the client is to be run in testnet mode, flag it as such
 # TODO
-#if [ "$HIVE_TESTNET" == "1" ]; then
+if [ "$HIVE_TESTNET" == "1" ]; then
 #	FLAGS="$FLAGS --testnet"
-#fi
+echo "Missing --testnet impl"
+fi
 
 # Handle any client mode or operation requests
 # TODO
-#if [ "$HIVE_NODETYPE" == "full" ]; then
+if [ "$HIVE_NODETYPE" == "full" ]; then
 #	FLAGS="$FLAGS --fast"
-#fi
+echo "Missing --fast impl"
+fi
 # TODO
-#if [ "$HIVE_NODETYPE" == "light" ]; then
+if [ "$HIVE_NODETYPE" == "light" ]; then
 #	FLAGS="$FLAGS --light"
-#fi
+    echo "Missing --light impl"
+fi
 
 # Override any chain configs in the Harmony specific way
 chainconfig="{}"
@@ -70,43 +74,50 @@ FLAGS="$FLAGS -DgenesisFile=/genesis.json"
 FLAGS="$FLAGS -Dserver.port=8545"
 FLAGS="$FLAGS -Ddatabase.dir=database"
 FLAGS="$FLAGS -Dlogs.keepStdOut=true"
+FLAGS="$FLAGS -Dpeer.bind.ip=0.0.0.0"
+FLAGS="$FLAGS -Dpeer.discovery.external.ip=0.0.0.0"
+FLAGS="$FLAGS -Dpeer.discovery.bind.ip=0.0.0.0"
 
+# Temporary
+FLAGS="$FLAGS -Dpeer.discovery.enabled=false"
 
 # Load the test chain if present
-echo "Loading initial blockchain..."
 if [ -f /chain.rlp ]; then
+    echo "Loading initial blockchain..."
     FLAGS="$FLAGS -Dblock.loader=/chain.rlp"
 fi
 
 # Load the remainder of the test chain
-echo "Loading remaining individual blocks..."
 # TODO
-#if [ -d /blocks ]; then
+if [ -d /blocks ]; then
+    echo "Loading remaining individual blocks..."
+    echo "Missing --blocks import impl"
 #	for block in `ls /blocks | sort -n`; do
 #		/geth $FLAGS import /blocks/$block
 #	done
-#fi
+fi
 
 # Load any keys explicitly added to the node
 # TODO
-#if [ -d /keys ]; then
+if [ -d /keys ]; then
 #	FLAGS="$FLAGS --keystore /keys"
-#fi
+    echo "Missing --keystore impl"
+fi
 
 # Configure any mining operation
 # TODO
-#if [ "$HIVE_MINER" != "" ]; then
+if [ "$HIVE_MINER" != "" ]; then
 #	FLAGS="$FLAGS --mine --minerthreads 1 --etherbase $HIVE_MINER"
-#fi
+    echo "Missing --mine impl"
+fi
 if [ "$HIVE_MINER_EXTRA" != "" ]; then
 	FLAGS="$FLAGS -Dmine.extraData=$HIVE_MINER_EXTRA"
 fi
 
-# Run the peer implementation with the requested flags
+# Run the go-ethereum implementation with the requested flags
+echo "Parameters $FLAGS"
 echo "Running Harmony..."
-tar -C / -xf /harmony.ether.camp.tar
-echo "Extracted tar..."
-export HARMONY_ETHER_CAMP_OPTS=$FLAGS
-echo "Options: $HARMONY_ETHER_CAMP_OPTS"
-
-/harmony.ether.camp/bin/harmony.ether.camp
+cd /ethereum-harmony
+./gradlew bootRun $FLAGS
+#./gradlew bootRun $FLAGS > out.log &
+#sleep 5s
