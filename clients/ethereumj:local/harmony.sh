@@ -105,5 +105,5 @@ fi
 
 # Run the go-ethereum implementation with the requested flags
 echo "Running Harmony..."
-cd /ethereum-harmony
-./gradlew bootRun $FLAGS
+export HARMONY_ETHER_CAMP_OPTS=$FLAGS
+/harmony.ether.camp/bin/harmony.ether.camp
