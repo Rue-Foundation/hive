@@ -76,7 +76,8 @@ RUN apk upgrade --update && \
 echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf
 
 # Make sure bash and jq is available for easier wrapper implementation
-RUN apt-get install bash
+#RUN apt-get install bash
+RUN apk add --update bash jq
 
 # Inject the startup script
 ADD harmony.sh /harmony.sh
