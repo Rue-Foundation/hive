@@ -98,10 +98,8 @@ if [ -d /blocks ]; then
 fi
 
 # Load any keys explicitly added to the node
-# TODO
 if [ -d /keys ]; then
-#	FLAGS="$FLAGS --keystore /keys"
-    echo "Missing --keystore impl"
+	FLAGS="$FLAGS -Dkeystore.dir=/keys"
 fi
 
 # Configure any mining operation

@@ -88,10 +88,9 @@ echo "Loading remaining individual blocks..."
 #fi
 
 # Load any keys explicitly added to the node
-# TODO
-#if [ -d /keys ]; then
-#	FLAGS="$FLAGS --keystore /keys"
-#fi
+if [ -d /keys ]; then
+	FLAGS="$FLAGS -Dkeystore.dir=/keys"
+fi
 
 # Configure any mining operation
 # TODO
