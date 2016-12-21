@@ -24,8 +24,7 @@ set -e
 
 # It doesn't make sense to dial out, use only a pre-set bootnode
 if [ "$HIVE_BOOTNODE" != "" ]; then
-	FLAGS="$FLAGS --bootnodes $HIVE_BOOTNODE"
-	echo "Missing --bootnodes impl"
+	FLAGS="$FLAGS -Dpeer.discovery.ip.list.0=$HIVE_BOOTNODE"
 else
 	FLAGS="$FLAGS -Ddiscovery.enabled=false"
 fi

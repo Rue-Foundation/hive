@@ -24,26 +24,29 @@ set -e
 
 # It doesn't make sense to dial out, use only a pre-set bootnode
 if [ "$HIVE_BOOTNODE" != "" ]; then
-	FLAGS="$FLAGS --bootnodes $HIVE_BOOTNODE"
+	FLAGS="$FLAGS -Dpeer.discovery.ip.list.0=$HIVE_BOOTNODE"
 else
 	FLAGS="$FLAGS -Ddiscovery.enabled=false"
 fi
 
 # If the client is to be run in testnet mode, flag it as such
 # TODO
-#if [ "$HIVE_TESTNET" == "1" ]; then
+if [ "$HIVE_TESTNET" == "1" ]; then
 #	FLAGS="$FLAGS --testnet"
-#fi
+echo "Missing --testnet impl"
+fi
 
 # Handle any client mode or operation requests
 # TODO
-#if [ "$HIVE_NODETYPE" == "full" ]; then
+if [ "$HIVE_NODETYPE" == "full" ]; then
 #	FLAGS="$FLAGS --fast"
-#fi
+echo "Missing --fast impl"
+fi
 # TODO
-#if [ "$HIVE_NODETYPE" == "light" ]; then
+if [ "$HIVE_NODETYPE" == "light" ]; then
 #	FLAGS="$FLAGS --light"
-#fi
+    echo "Missing --light impl"
+fi
 
 # Override any chain configs in the Harmony specific way
 chainconfig="{}"
@@ -79,13 +82,14 @@ if [ -f /chain.rlp ]; then
 fi
 
 # Load the remainder of the test chain
-echo "Loading remaining individual blocks..."
 # TODO
-#if [ -d /blocks ]; then
+if [ -d /blocks ]; then
+    echo "Loading remaining individual blocks..."
+    echo "Missing --blocks import impl"
 #	for block in `ls /blocks | sort -n`; do
 #		/geth $FLAGS import /blocks/$block
 #	done
-#fi
+fi
 
 # Load any keys explicitly added to the node
 if [ -d /keys ]; then
@@ -94,9 +98,10 @@ fi
 
 # Configure any mining operation
 # TODO
-#if [ "$HIVE_MINER" != "" ]; then
+if [ "$HIVE_MINER" != "" ]; then
 #	FLAGS="$FLAGS --mine --minerthreads 1 --etherbase $HIVE_MINER"
-#fi
+    echo "Missing --mine impl"
+fi
 if [ "$HIVE_MINER_EXTRA" != "" ]; then
 	FLAGS="$FLAGS -Dmine.extraData=$HIVE_MINER_EXTRA"
 fi
