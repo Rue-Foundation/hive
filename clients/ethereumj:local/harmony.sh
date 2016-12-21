@@ -97,10 +97,8 @@ if [ -d /keys ]; then
 fi
 
 # Configure any mining operation
-# TODO
 if [ "$HIVE_MINER" != "" ]; then
-#	FLAGS="$FLAGS --mine --minerthreads 1 --etherbase $HIVE_MINER"
-    echo "Missing --mine impl"
+	FLAGS="$FLAGS -Dmine.start=true -Dmine.coinbase=$HIVE_MINER"
 fi
 if [ "$HIVE_MINER_EXTRA" != "" ]; then
 	FLAGS="$FLAGS -Dmine.extraData=$HIVE_MINER_EXTRA"
