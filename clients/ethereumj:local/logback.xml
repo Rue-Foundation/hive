@@ -56,7 +56,7 @@
     <logger level="ERROR" name="blockqueue"/>
     <logger level="INFO" name="ethereum-service"/>
     <logger level="INFO" name="report"/>
-    <logger level="INFO" name="general"/>
+    <logger level="ERROR" name="general"/>
     <logger level="INFO" name="system"/>
     <logger level="INFO" name="facade"/>
     <logger level="INFO" name="block"/>
