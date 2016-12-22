@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+echo "Disabled due to mining"
+exit 1
+
+
 # Start two DAO enabled clients, one pro and one contra fork (don't connect them)
 echo -n "Starting DAO enabled clients..."
 

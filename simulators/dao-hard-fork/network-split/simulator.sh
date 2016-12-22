@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+echo "Disabled due to mining"
+exit 1
+
 # Create and start a valid bootnode for the clients to find each other
 BOOTNODE_KEYHEX=5ce1f6fc42c817c38939498ee7fcdd9a06fa9d947d02d42dfe814406f370c4eb
 BOOTNODE_ENODEID=6433e8fb82c4638a8a6d499d40eb7d8158883219600bfd49acb968e3a37ccced04c964fa87b3a78a2da1b71dc1b90275f4d055720bb67fad4a118a56925125dc
