@@ -83,7 +83,7 @@ FLAGS="$FLAGS -Dpeer.discovery.enabled=false"
 # Load the test chain if present
 if [ -f /chain.rlp ]; then
     echo "Loading initial blockchain..."
-    FLAGS="$FLAGS -Dblock.loader=/chain.rlp"
+    FLAGS="$FLAGS -Dblocks.loader=/chain.rlp"
 fi
 
 # Load the remainder of the test chain

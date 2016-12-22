@@ -78,7 +78,7 @@ FLAGS="$FLAGS -Dlogs.keepStdOut=true"
 # Load the test chain if present
 echo "Loading initial blockchain..."
 if [ -f /chain.rlp ]; then
-    FLAGS="$FLAGS -Dblock.loader=/chain.rlp"
+    FLAGS="$FLAGS -Dblocks.loader=/chain.rlp"
 fi
 
 # Load the remainder of the test chain
