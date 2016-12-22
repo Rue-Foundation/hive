@@ -30,10 +30,8 @@ else
 fi
 
 # If the client is to be run in testnet mode, flag it as such
-# TODO
 if [ "$HIVE_TESTNET" == "1" ]; then
-#	FLAGS="$FLAGS --testnet"
-echo "Missing --testnet impl"
+	FLAGS="$FLAGS -Dblockchain.config.name=morden"
 fi
 
 # Handle any client mode or operation requests
@@ -48,7 +46,7 @@ if [ "$HIVE_NODETYPE" == "light" ]; then
     echo "Missing --light impl"
 fi
 
-# Override any chain configs in the Harmony specific way
+# Override any chain configs in the geth/Harmony specific way
 chainconfig="{}"
 if [ "$HIVE_FORK_HOMESTEAD" != "" ]; then
 	chainconfig=`echo $chainconfig | jq ". + {\"homesteadBlock\": $HIVE_FORK_HOMESTEAD}"`
