@@ -70,7 +70,7 @@ fi
 # Initialize the local testchain with the genesis state
 echo "Initializing database with genesis state..."
 FLAGS="$FLAGS -DgenesisFile=/genesis.json"
-
+FLAGS="$FLAGS -Dlogback.configurationFile=/logback.xml"
 FLAGS="$FLAGS -Dserver.port=8545"
 FLAGS="$FLAGS -Ddatabase.dir=database"
 FLAGS="$FLAGS -Dlogs.keepStdOut=true"

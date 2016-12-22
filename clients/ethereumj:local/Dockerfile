@@ -81,6 +81,7 @@ RUN apk add --update bash jq
 
 # Inject the startup script
 ADD harmony.sh /harmony.sh
+ADD logback.xml /logback.xml
 RUN chmod +x /harmony.sh
 
 # Export the usual networking ports to allow outside access to the node
