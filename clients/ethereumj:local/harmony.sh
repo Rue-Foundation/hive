@@ -76,17 +76,19 @@ FLAGS="$FLAGS -Dlogs.keepStdOut=true"
 # Load the test chain if present
 echo "Loading initial blockchain..."
 if [ -f /chain.rlp ]; then
-    FLAGS="$FLAGS -Dblocks.loader=/chain.rlp"
+    export HARMONY_ETHER_CAMP_OPTS="$FLAGS -Dblocks.format=rlp -Dblocks.loader=/chain.rlp"
+    echo "importBlocks options: $HARMONY_ETHER_CAMP_OPTS"
+
+    /harmony.ether.camp/bin/harmony.ether.camp importBlocks
 fi
 
 # Load the remainder of the test chain
-# TODO
 if [ -d /blocks ]; then
     echo "Loading remaining individual blocks..."
-    echo "Missing --blocks import impl"
-#	for block in `ls /blocks | sort -n`; do
-#		/geth $FLAGS import /blocks/$block
-#	done
+    for block in `ls /blocks | sort -n`; do
+        export HARMONY_ETHER_CAMP_OPTS="$FLAGS -Dblocks.format=rlp -Dblocks.loader=/blocks/$block"
+		/harmony.ether.camp/bin/harmony.ether.camp importBlocks
+	done
 fi
 
 # Load any keys explicitly added to the node
