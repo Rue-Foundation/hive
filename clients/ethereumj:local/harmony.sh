@@ -22,6 +22,9 @@
 # Immediately abort the script on any error encountered
 set -e
 
+tar -C / -xf /harmony.ether.camp.tar
+echo "Extracted tar..."
+
 # It doesn't make sense to dial out, use only a pre-set bootnode
 if [ "$HIVE_BOOTNODE" != "" ]; then
 	FLAGS="$FLAGS -Dpeer.discovery.ip.list.0=$HIVE_BOOTNODE"
@@ -72,7 +75,6 @@ FLAGS="$FLAGS -Dserver.port=8545"
 FLAGS="$FLAGS -Ddatabase.dir=database"
 FLAGS="$FLAGS -Dlogs.keepStdOut=true"
 
-
 # Load the test chain if present
 echo "Loading initial blockchain..."
 if [ -f /chain.rlp ]; then
@@ -106,8 +108,6 @@ fi
 
 # Run the peer implementation with the requested flags
 echo "Running Harmony..."
-tar -C / -xf /harmony.ether.camp.tar
-echo "Extracted tar..."
 export HARMONY_ETHER_CAMP_OPTS=$FLAGS
 echo "Options: $HARMONY_ETHER_CAMP_OPTS"
 
