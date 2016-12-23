@@ -22,6 +22,10 @@
 # Immediately abort the script on any error encountered
 set -e
 
+cd \ethereumj && git pull
+cd \ethereumj && ./gradlew install -x test
+cd \ethereum-harmony && git pull
+
 # It doesn't make sense to dial out, use only a pre-set bootnode
 if [ "$HIVE_BOOTNODE" != "" ]; then
 	FLAGS="$FLAGS -Dpeer.discovery.ip.list.0=$HIVE_BOOTNODE"
@@ -36,10 +40,8 @@ if [ "$HIVE_TESTNET" == "1" ]; then
 fi
 
 # Handle any client mode or operation requests
-# TODO
 if [ "$HIVE_NODETYPE" == "full" ]; then
-#	FLAGS="$FLAGS --fast"
-echo "Missing --fast impl"
+	FLAGS="$FLAGS -Dsync.fast.enabled=true"
 fi
 # TODO
 if [ "$HIVE_NODETYPE" == "light" ]; then
@@ -72,6 +74,10 @@ FLAGS="$FLAGS -DgenesisFile=/genesis.json"
 FLAGS="$FLAGS -Dserver.port=8545"
 FLAGS="$FLAGS -Ddatabase.dir=database"
 FLAGS="$FLAGS -Dlogs.keepStdOut=true"
+
+FLAGS="$FLAGS -Dlogging.level.sync=DEBUG"
+FLAGS="$FLAGS -Dlogging.level.net=DEBUG"
+FLAGS="$FLAGS -Dlogging.level.discovery=DEBUG"
 
 # Load the test chain if present
 echo "Loading initial blockchain..."
@@ -110,6 +116,4 @@ fi
 echo "Parameters $FLAGS"
 echo "Running Harmony..."
 cd /ethereum-harmony
-./gradlew bootRun $FLAGS
-#./gradlew bootRun $FLAGS > out.log &
-#sleep 5s
+./gradlew bootRun $FLAGS -PuseMavenLocal
