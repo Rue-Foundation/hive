@@ -26,7 +26,8 @@ set -e
 if [ "$HIVE_BOOTNODE" != "" ]; then
 	FLAGS="$FLAGS -Dpeer.discovery.ip.list.0=$HIVE_BOOTNODE"
 else
-	FLAGS="$FLAGS -Ddiscovery.enabled=false"
+	FLAGS="$FLAGS"
+	#FLAGS="$FLAGS -Dpeer.discovery.enabled=false"
 fi
 
 # If the client is to be run in testnet mode, flag it as such
@@ -71,27 +72,25 @@ FLAGS="$FLAGS -DgenesisFile=/genesis.json"
 FLAGS="$FLAGS -Dserver.port=8545"
 FLAGS="$FLAGS -Ddatabase.dir=database"
 FLAGS="$FLAGS -Dlogs.keepStdOut=true"
-FLAGS="$FLAGS -Dpeer.bind.ip=0.0.0.0"
-FLAGS="$FLAGS -Dpeer.discovery.external.ip=0.0.0.0"
-FLAGS="$FLAGS -Dpeer.discovery.bind.ip=0.0.0.0"
-
-# Temporary
-FLAGS="$FLAGS -Dpeer.discovery.enabled=false"
 
 # Load the test chain if present
+echo "Loading initial blockchain..."
 if [ -f /chain.rlp ]; then
-    echo "Loading initial blockchain..."
-    FLAGS="$FLAGS -Dblocks.loader=/chain.rlp"
+    export HARMONY_ETHER_CAMP_OPTS="$FLAGS -Dblocks.format=rlp -Dblocks.loader=/chain.rlp"
+    echo "importBlocks options: $HARMONY_ETHER_CAMP_OPTS"
+
+    cd /ethereum-harmony
+    ./gradlew importBlocks $HARMONY_ETHER_CAMP_OPTS
 fi
 
 # Load the remainder of the test chain
-# TODO
 if [ -d /blocks ]; then
     echo "Loading remaining individual blocks..."
-    echo "Missing --blocks import impl"
-#	for block in `ls /blocks | sort -n`; do
-#		/geth $FLAGS import /blocks/$block
-#	done
+    for block in `ls /blocks | sort -n`; do
+        export HARMONY_ETHER_CAMP_OPTS="$FLAGS -Dblocks.format=rlp -Dblocks.loader=/blocks/$block"
+		cd /ethereum-harmony
+        ./gradlew importBlocks $HARMONY_ETHER_CAMP_OPTS
+	done
 fi
 
 # Load any keys explicitly added to the node
@@ -100,10 +99,8 @@ if [ -d /keys ]; then
 fi
 
 # Configure any mining operation
-# TODO
 if [ "$HIVE_MINER" != "" ]; then
-#	FLAGS="$FLAGS --mine --minerthreads 1 --etherbase $HIVE_MINER"
-    echo "Missing --mine impl"
+	FLAGS="$FLAGS -Dmine.start=true -Dmine.coinbase=$HIVE_MINER"
 fi
 if [ "$HIVE_MINER_EXTRA" != "" ]; then
 	FLAGS="$FLAGS -Dmine.extraData=$HIVE_MINER_EXTRA"

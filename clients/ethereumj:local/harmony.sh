@@ -3,7 +3,7 @@
 # Startup script to initialize and boot a peer instance.
 #
 # This script assumes the following files:
-#  - `geth` binary is located in the filesystem root
+#  - `harmony.ether.camp.tar` file is located in the filesystem root
 #  - `genesis.json` file is located in the filesystem root (mandatory)
 #  - `chain.rlp` file is located in the filesystem root (optional)
 #  - `blocks` folder is located in the filesystem root (optional)
@@ -29,7 +29,8 @@ echo "Extracted tar..."
 if [ "$HIVE_BOOTNODE" != "" ]; then
 	FLAGS="$FLAGS -Dpeer.discovery.ip.list.0=$HIVE_BOOTNODE"
 else
-	FLAGS="$FLAGS -Ddiscovery.enabled=false"
+    FLAGS="$FLAGS"
+	#FLAGS="$FLAGS -Dpeer.discovery.enabled=false"
 fi
 
 # If the client is to be run in testnet mode, flag it as such
