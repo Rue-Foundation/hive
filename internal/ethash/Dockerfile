@@ -79,14 +79,6 @@ RUN \
 # Make sure bash and jq is available for easier wrapper implementation
 RUN apk add --update bash jq
 
-# Inject the startup script
-ADD harmony.sh /harmony.sh
-RUN chmod +x /harmony.sh
-
-# Export the usual networking ports to allow outside access to the node
-EXPOSE 8545 8546 30303
-
-
 ADD dag.sh dag.sh
 RUN chmod 755 /dag.sh
 
