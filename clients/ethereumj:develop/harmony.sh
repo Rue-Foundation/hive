@@ -22,9 +22,6 @@
 # Immediately abort the script on any error encountered
 set -e
 
-echo `pwd`
-echo `ls`
-
 cd /ethereumj && git pull
 cd /ethereumj && ./gradlew install -x test
 cd /ethereum-harmony && git pull
@@ -73,6 +70,7 @@ fi
 # Initialize the local testchain with the genesis state
 echo "Initializing database with genesis state..."
 FLAGS="$FLAGS -DgenesisFile=/genesis.json"
+FLAGS="$FLAGS -Dethash.dir=/root/.ethash"
 
 FLAGS="$FLAGS -Dserver.port=8545"
 FLAGS="$FLAGS -Ddatabase.dir=database"
@@ -82,7 +80,7 @@ FLAGS="$FLAGS -Dlogging.level.sync=ERROR"
 FLAGS="$FLAGS -Dlogging.level.net=INFO"
 FLAGS="$FLAGS -Dlogging.level.discover=ERROR"
 FLAGS="$FLAGS -Dlogging.level.general=ERROR"
-FLAGS="$FLAGS -Dlogging.level.mine=ERROR"
+#FLAGS="$FLAGS -Dlogging.level.mine=ERROR"
 FLAGS="$FLAGS -Dlogging.level.jsonrpc=ERROR"
 FLAGS="$FLAGS -Dlogging.level.harmony=ERROR"
 
