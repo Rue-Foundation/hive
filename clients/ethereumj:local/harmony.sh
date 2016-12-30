@@ -101,7 +101,7 @@ fi
 
 # Configure any mining operation
 if [ "$HIVE_MINER" != "" ]; then
-	FLAGS="$FLAGS -Dmine.start=true -Dmine.coinbase=$HIVE_MINER"
+	FLAGS="$FLAGS -Dmine.start=true -Dmine.coinbase=$HIVE_MINER -DnetworkProfile=private"
 fi
 if [ "$HIVE_MINER_EXTRA" != "" ]; then
 	FLAGS="$FLAGS -Dmine.extraData=$HIVE_MINER_EXTRA"

@@ -1,10 +1,6 @@
 #!/bin/bash
 set -e
 
-echo "Disabled due to mining"
-exit 1
-
-
 # Start two DAO enabled clients, one pro and one contra fork (don't connect them)
 echo -n "Starting DAO enabled clients..."
 
@@ -48,7 +44,7 @@ for block in `seq 1 $proLatest`; do
 		fi
 	else
 		if [ "$extra" == "0x64616f2d686172642d666f726b" ]; then
-			echo "[pro] Non DAO fork start (block #$block) has DAO extra-data"
+			echo "[pro] Non DAO fork start (block #$block) has DAO extra-data ($extra vs 0x64616f2d686172642d666f726b)"
 			exit -1
 		fi
 	fi

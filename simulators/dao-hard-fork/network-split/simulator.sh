@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-echo "Disabled due to mining"
-exit 1
-
 # Create and start a valid bootnode for the clients to find each other
 BOOTNODE_KEYHEX=5ce1f6fc42c817c38939498ee7fcdd9a06fa9d947d02d42dfe814406f370c4eb
 BOOTNODE_ENODEID=6433e8fb82c4638a8a6d499d40eb7d8158883219600bfd49acb968e3a37ccced04c964fa87b3a78a2da1b71dc1b90275f4d055720bb67fad4a118a56925125dc
@@ -77,6 +74,12 @@ function waitBlock {
 	done
 }
 
+
+## Start the miners for the two camps
+nofork+=(`curl -sf -X POST --data-urlencode "HIVE_BOOTNODE=$BOOTNODE_ENODE" $HIVE_SIMULATOR/nodes?HIVE_FORK_DAO_VOTE=0\&HIVE_MINER=0x0000000000000000000000000000000000000001`)
+profork+=(`curl -sf -X POST --data-urlencode "HIVE_BOOTNODE=$BOOTNODE_ENODE" $HIVE_SIMULATOR/nodes?HIVE_FORK_DAO_VOTE=1\&HIVE_MINER=0x0000000000000000000000000000000000000001`)
+sleep 1
+
 # Start a batch of clients for the no-fork camp
 nofork=()
 for i in `seq 1 $NO_FORK_NODES`; do
@@ -93,11 +96,6 @@ for i in `seq 1 $PRO_FORK_NODES`; do
 	sleep 1 # Wait a bit until it's registered by the bootnode
 done
 
-# Start the miners for the two camps
-nofork+=(`curl -sf -X POST --data-urlencode "HIVE_BOOTNODE=$BOOTNODE_ENODE" $HIVE_SIMULATOR/nodes?HIVE_FORK_DAO_VOTE=0\&HIVE_MINER=0x00000000000000000000000000000000000001`)
-profork+=(`curl -sf -X POST --data-urlencode "HIVE_BOOTNODE=$BOOTNODE_ENODE" $HIVE_SIMULATOR/nodes?HIVE_FORK_DAO_VOTE=1\&HIVE_MINER=0x00000000000000000000000000000000000001`)
-sleep 1
-
 allnodes=( "${nofork[@]}" "${profork[@]}" )
 
 # Wait a bit for the nodes to all find each other
@@ -105,11 +103,16 @@ for id in ${allnodes[@]}; do
 	waitPeers $id $PRE_FORK_PEERS
 done
 
+echo "profork ${profork[*]}"
+echo "nofork ${nofork[*]}"
+
 # Wait until all miners pass the DAO fork block range
 waitBlock ${nofork[$NO_FORK_NODES]} $((HIVE_FORK_DAO_BLOCK + 10))
 waitBlock ${profork[$PRO_FORK_NODES]} $((HIVE_FORK_DAO_BLOCK + 10))
+#waitBlock ${nofork[0]} $((HIVE_FORK_DAO_BLOCK + 10))
+#waitBlock ${profork[0]} $((HIVE_FORK_DAO_BLOCK + 10))
 
 # Check that we have two disjoint set of nodes
-for id in ${allnodes[@]}; do
-	waitPeers $id $POST_FORK_PEERS
-done
+#for id in ${allnodes[@]}; do
+#	waitPeers $id $POST_FORK_PEERS
+#done

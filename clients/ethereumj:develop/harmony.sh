@@ -22,9 +22,12 @@
 # Immediately abort the script on any error encountered
 set -e
 
-cd \ethereumj && git pull
-cd \ethereumj && ./gradlew install -x test
-cd \ethereum-harmony && git pull
+echo `pwd`
+echo `ls`
+
+cd /ethereumj && git pull
+cd /ethereumj && ./gradlew install -x test
+cd /ethereum-harmony && git pull
 
 # It doesn't make sense to dial out, use only a pre-set bootnode
 if [ "$HIVE_BOOTNODE" != "" ]; then
@@ -40,9 +43,9 @@ if [ "$HIVE_TESTNET" == "1" ]; then
 fi
 
 # Handle any client mode or operation requests
-if [ "$HIVE_NODETYPE" == "full" ]; then
-	FLAGS="$FLAGS -Dsync.fast.enabled=true"
-fi
+#if [ "$HIVE_NODETYPE" == "full" ]; then
+#	FLAGS="$FLAGS -Dsync.fast.enabled=true"
+#fi
 # TODO
 if [ "$HIVE_NODETYPE" == "light" ]; then
 #	FLAGS="$FLAGS --light"
@@ -75,9 +78,13 @@ FLAGS="$FLAGS -Dserver.port=8545"
 FLAGS="$FLAGS -Ddatabase.dir=database"
 FLAGS="$FLAGS -Dlogs.keepStdOut=true"
 
-FLAGS="$FLAGS -Dlogging.level.sync=DEBUG"
-FLAGS="$FLAGS -Dlogging.level.net=DEBUG"
-FLAGS="$FLAGS -Dlogging.level.discovery=DEBUG"
+FLAGS="$FLAGS -Dlogging.level.sync=ERROR"
+FLAGS="$FLAGS -Dlogging.level.net=INFO"
+FLAGS="$FLAGS -Dlogging.level.discover=ERROR"
+FLAGS="$FLAGS -Dlogging.level.general=ERROR"
+FLAGS="$FLAGS -Dlogging.level.mine=ERROR"
+FLAGS="$FLAGS -Dlogging.level.jsonrpc=ERROR"
+FLAGS="$FLAGS -Dlogging.level.harmony=ERROR"
 
 # Load the test chain if present
 echo "Loading initial blockchain..."
@@ -106,7 +113,7 @@ fi
 
 # Configure any mining operation
 if [ "$HIVE_MINER" != "" ]; then
-	FLAGS="$FLAGS -Dmine.start=true -Dmine.coinbase=$HIVE_MINER"
+	FLAGS="$FLAGS -Dmine.start=true -Dmine.coinbase=$HIVE_MINER -DnetworkProfile=private"
 fi
 if [ "$HIVE_MINER_EXTRA" != "" ]; then
 	FLAGS="$FLAGS -Dmine.extraData=$HIVE_MINER_EXTRA"
