@@ -13,7 +13,7 @@ BOOTNODE_ENODE="enode://$BOOTNODE_ENODEID@$BOOTNODE_IP:30303"
 # Configure the simulation parameters
 NO_FORK_NODES=1	 # Number of plain no-fork nodes to boot up (+1 miner)
 PRO_FORK_NODES=1	# Number of plain pro-fork nodes to boot up (+1 miner)
-PRE_FORK_PEERS=3	# Number of peers to require pre-fork (total - 1)
+#PRE_FORK_PEERS=2	# Number of peers to require pre-fork (total - 1)
 POST_FORK_PEERS=1 # Number of peers to require post-fork (same camp - 1)
 
 # netPeerCount executes an RPC request to a node to retrieve its current number
@@ -64,18 +64,25 @@ function ethBlockNumber {
 # one, periodically polling and sleeping otherwise. There is no timeout, the method
 # will block until it succeeds.
 function waitBlock {
+    echo "Wait for block with [$1] [$2] HIVE_FORK_DAO_BLOCK:$HIVE_FORK_DAO_BLOCK"
 	local ip=`curl -sf $HIVE_SIMULATOR/nodes/$1`
+	echo "Script waitBlock ip ${ip}"
 
 	while [ true ]; do
 		block=`ethBlockNumber $ip`
-#		echo "Script waitBlock result $block vs $2 for $ip"
+		echo " "
 		if [ "$block" -gt "$2" ]; then
 			break
 		fi
+		echo "Script waitBlock result ${block}"
+#		echo " $2"
+#		echo " $ip"
 		sleep 2
 	done
 }
 
+nofork=()
+profork=()
 
 ## Start the miners for the two camps
 nofork+=(`curl -sf -X POST --data-urlencode "HIVE_BOOTNODE=$BOOTNODE_ENODE" $HIVE_SIMULATOR/nodes?HIVE_FORK_DAO_VOTE=0\&HIVE_MINER=0x0000000000000000000000000000000000000001`)
@@ -83,7 +90,6 @@ profork+=(`curl -sf -X POST --data-urlencode "HIVE_BOOTNODE=$BOOTNODE_ENODE" $HI
 sleep 1
 
 # Start a batch of clients for the no-fork camp
-nofork=()
 for i in `seq 1 $NO_FORK_NODES`; do
 	echo "Starting no-fork client #$i..."
 	nofork+=(`curl -sf -X POST --data-urlencode "HIVE_BOOTNODE=$BOOTNODE_ENODE" $HIVE_SIMULATOR/nodes?HIVE_FORK_DAO_VOTE=0`)
@@ -91,7 +97,6 @@ for i in `seq 1 $NO_FORK_NODES`; do
 done
 
 # Start a batch of clients for the pro-fork camp
-profork=()
 for i in `seq 1 $PRO_FORK_NODES`; do
 	echo "Starting pro-fork client #$i..."
 	profork+=(`curl -sf -X POST --data-urlencode "HIVE_BOOTNODE=$BOOTNODE_ENODE" $HIVE_SIMULATOR/nodes?HIVE_FORK_DAO_VOTE=1`)
@@ -101,18 +106,18 @@ done
 allnodes=( "${nofork[@]}" "${profork[@]}" )
 
 # Wait a bit for the nodes to all find each other
-for id in ${allnodes[@]}; do
-	waitPeers $id $PRE_FORK_PEERS
-done
+#for id in ${allnodes[@]}; do
+#	waitPeers $id $PRE_FORK_PEERS
+#done
 
 echo "profork ${profork[*]}"
 echo "nofork ${nofork[*]}"
 
 # Wait until all miners pass the DAO fork block range
-waitBlock ${nofork[$NO_FORK_NODES]} $((HIVE_FORK_DAO_BLOCK + 10))
-waitBlock ${profork[$PRO_FORK_NODES]} $((HIVE_FORK_DAO_BLOCK + 10))
-#waitBlock ${nofork[0]} $((HIVE_FORK_DAO_BLOCK + 10))
-#waitBlock ${profork[0]} $((HIVE_FORK_DAO_BLOCK + 10))
+#waitBlock ${nofork[$NO_FORK_NODES]} $((HIVE_FORK_DAO_BLOCK + 10))
+#waitBlock ${profork[$PRO_FORK_NODES]} $((HIVE_FORK_DAO_BLOCK + 10))
+waitBlock ${nofork[0]} $((HIVE_FORK_DAO_BLOCK + 10))
+waitBlock ${profork[0]} $((HIVE_FORK_DAO_BLOCK + 10))
 
 # Check that we have two disjoint set of nodes
 echo "Final check with waitPeers"
