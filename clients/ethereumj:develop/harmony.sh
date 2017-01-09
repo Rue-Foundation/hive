@@ -80,7 +80,7 @@ FLAGS="$FLAGS -Dlogging.level.sync=ERROR"
 FLAGS="$FLAGS -Dlogging.level.net=INFO"
 FLAGS="$FLAGS -Dlogging.level.discover=ERROR"
 FLAGS="$FLAGS -Dlogging.level.general=ERROR"
-#FLAGS="$FLAGS -Dlogging.level.mine=ERROR"
+FLAGS="$FLAGS -Dlogging.level.mine=ERROR"
 FLAGS="$FLAGS -Dlogging.level.jsonrpc=ERROR"
 FLAGS="$FLAGS -Dlogging.level.harmony=ERROR"
 
@@ -110,15 +110,17 @@ if [ -d /keys ]; then
 fi
 
 # Configure any mining operation
-if [ "$HIVE_MINER" != "" ]; then
-	FLAGS="$FLAGS -Dmine.start=true -Dmine.coinbase=$HIVE_MINER -DnetworkProfile=private"
-fi
+#if [ "$HIVE_MINER" != "" ]; then
+#	FLAGS="$FLAGS -Dmine.start=true -Dmine.coinbase=$HIVE_MINER -DnetworkProfile=private"
+#fi
 if [ "$HIVE_MINER_EXTRA" != "" ]; then
 	FLAGS="$FLAGS -Dmine.extraData=$HIVE_MINER_EXTRA"
 fi
 
-# Run the go-ethereum implementation with the requested flags
+# Run the peer implementation with the requested flags
 echo "Parameters $FLAGS"
 echo "Running Harmony..."
 cd /ethereum-harmony
 ./gradlew bootRun $FLAGS -PuseMavenLocal
+
+

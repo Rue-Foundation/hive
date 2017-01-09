@@ -11,10 +11,10 @@ BOOTNODE_ENODE="enode://$BOOTNODE_ENODEID@$BOOTNODE_IP:30303"
 /bootnode --nodekeyhex $BOOTNODE_KEYHEX --addr=0.0.0.0:30303 &
 
 # Configure the simulation parameters
-NO_FORK_NODES=2	 # Number of plain no-fork nodes to boot up (+1 miner)
-PRO_FORK_NODES=2	# Number of plain pro-fork nodes to boot up (+1 miner)
-PRE_FORK_PEERS=5	# Number of peers to require pre-fork (total - 1)
-POST_FORK_PEERS=2 # Number of peers to require post-fork (same camp - 1)
+NO_FORK_NODES=1	 # Number of plain no-fork nodes to boot up (+1 miner)
+PRO_FORK_NODES=1	# Number of plain pro-fork nodes to boot up (+1 miner)
+PRE_FORK_PEERS=3	# Number of peers to require pre-fork (total - 1)
+POST_FORK_PEERS=1 # Number of peers to require post-fork (same camp - 1)
 
 # netPeerCount executes an RPC request to a node to retrieve its current number
 # of connected peers.
@@ -33,19 +33,20 @@ function netPeerCount {
 function waitPeers {
 	local ip=`curl -sf $HIVE_SIMULATOR/nodes/$1`
 
-	for i in `seq 1 10`; do
+	for i in `seq 1 100`; do
 		# Fetch the current peer count and stop if it's correct
 		peers=`netPeerCount $ip`
+		echo "Script waitPeers result $peers vs $2 for $ip"
 		if [ "$peers" == "$2" ]; then
 			break
 		fi
 		# Seems peer count is wrong, unless too many trials, sleep a bit and retry
-		if [ "$i" == "10" ]; then
+		if [ "$i" == "100" ]; then
 			echo "Invalid peer count for $1 ($ip): have $peers, want $2"
 			exit -1
 		fi
 
-		sleep 0.5
+		sleep 2
 	done
 }
 
@@ -67,10 +68,11 @@ function waitBlock {
 
 	while [ true ]; do
 		block=`ethBlockNumber $ip`
+#		echo "Script waitBlock result $block vs $2 for $ip"
 		if [ "$block" -gt "$2" ]; then
 			break
 		fi
-		sleep 0.5
+		sleep 2
 	done
 }
 
@@ -113,6 +115,7 @@ waitBlock ${profork[$PRO_FORK_NODES]} $((HIVE_FORK_DAO_BLOCK + 10))
 #waitBlock ${profork[0]} $((HIVE_FORK_DAO_BLOCK + 10))
 
 # Check that we have two disjoint set of nodes
-#for id in ${allnodes[@]}; do
-#	waitPeers $id $POST_FORK_PEERS
-#done
+echo "Final check with waitPeers"
+for id in ${allnodes[@]}; do
+	waitPeers $id $POST_FORK_PEERS
+done
