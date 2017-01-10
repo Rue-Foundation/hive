@@ -33,7 +33,7 @@ function netPeerCount {
 function waitPeers {
 	local ip=`curl -sf $HIVE_SIMULATOR/nodes/$1`
 
-	for i in `seq 1 100`; do
+	for i in `seq 1 300`; do
 		# Fetch the current peer count and stop if it's correct
 		peers=`netPeerCount $ip`
 		echo "Script waitPeers result $peers vs $2 for $ip"
@@ -41,7 +41,7 @@ function waitPeers {
 			break
 		fi
 		# Seems peer count is wrong, unless too many trials, sleep a bit and retry
-		if [ "$i" == "100" ]; then
+		if [ "$i" == "300" ]; then
 			echo "Invalid peer count for $1 ($ip): have $peers, want $2"
 			exit -1
 		fi
