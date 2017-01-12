@@ -18,21 +18,22 @@ import (
 
 // simulateClients runs a batch of simulation tests matched by simulatorPattern
 // against all clients matching clientPattern.
-func simulateClients(daemon *docker.Client, clientPattern, simulatorPattern string, overrides []string) error {
+func simulateClients(daemon *docker.Client, clientPattern, simulatorPattern string, overrides []string) (bool, error) {
 	// Build all the clients matching the validation pattern
 	log15.Info("building clients for simulation", "pattern", clientPattern)
 	clients, err := buildClients(daemon, clientPattern)
 	if err != nil {
-		return err
+		return true, err
 	}
 	// Build all the validators known to the test harness
 	log15.Info("building simulators for testing", "pattern", simulatorPattern)
 	simulators, err := buildSimulators(daemon, simulatorPattern)
 	if err != nil {
-		return err
+		return true, err
 	}
 	// Iterate over all client and simulator combos and cross-execute them
 	results := make(map[string]map[string][]string)
+	anyFailed := false
 
 	for client, clientImage := range clients {
 		results[client] = make(map[string][]string)
@@ -48,6 +49,7 @@ func simulateClients(daemon *docker.Client, clientPattern, simulatorPattern stri
 				logger.Info("simulation passed", "time", time.Since(start))
 				results[client]["pass"] = append(results[client]["pass"], simulator)
 			} else {
+				anyFailed = true;
 				logger.Error("simulation failed", "time", time.Since(start))
 				fail := simulator
 				if err != nil {
@@ -61,7 +63,7 @@ func simulateClients(daemon *docker.Client, clientPattern, simulatorPattern stri
 	out, _ := json.MarshalIndent(results, "", "  ")
 	fmt.Printf("Simulation results:\n%s\n", string(out))
 
-	return nil
+	return anyFailed, nil
 }
 
 // simulate starts a simulator service locally, starts a controlling container

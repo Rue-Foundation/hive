@@ -49,12 +49,14 @@ func main() {
 	}
 	// Depending on the flags, either run hive in place or in an outer container shell
 	var fail error
+	var anyFailed bool
+
 	if *noShellContainer {
-		fail = mainInHost(daemon, overrides)
+		anyFailed, fail = mainInHost(daemon, overrides)
 	} else {
 		fail = mainInShell(daemon, overrides)
 	}
-	if fail != nil {
+	if fail != nil || anyFailed {
 		os.Exit(-1)
 	}
 }
@@ -62,45 +64,55 @@ func main() {
 // mainInHost runs the actual hive validation, simulation and benchmarking on the
 // host machine itself. This is usually the path executed within an outer shell
 // container, but can be also requested directly.
-func mainInHost(daemon *docker.Client, overrides []string) error {
+func mainInHost(daemon *docker.Client, overrides []string) (bool, error) {
 	// Smoke tests are exclusive with all other flags
+	var anyFailed bool
+
 	if *smokeFlag {
-		if err := validateClients(daemon, *clientPattern, "smoke/", overrides); err != nil {
+		failed, err := validateClients(daemon, *clientPattern, "smoke/", overrides);
+		anyFailed = failed || anyFailed;
+		if err != nil {
 			log15.Crit("failed to smoke-validate client images", "error", err)
-			return err
+			return true, err
 		}
-		if err := simulateClients(daemon, *clientPattern, "smoke/", overrides); err != nil {
+		failed, err = simulateClients(daemon, *clientPattern, "smoke/", overrides);
+		anyFailed = failed || anyFailed;
+		if err != nil {
 			log15.Crit("failed to smoke-simulate client images", "error", err)
-			return err
+			return true, err
 		}
 		if err := benchmarkClients(daemon, *clientPattern, "smoke/", overrides); err != nil {
 			log15.Crit("failed to smoke-benchmark client images", "error", err)
-			return err
+			return true, err
 		}
-		return nil
+		return anyFailed, nil
 	}
 	// Otherwise run all requested validation and simulation tests
 	if *validatorPattern != "" {
-		if err := validateClients(daemon, *clientPattern, *validatorPattern, overrides); err != nil {
+		failed, err := validateClients(daemon, *clientPattern, *validatorPattern, overrides);
+		anyFailed = failed || anyFailed;
+		if err != nil {
 			log15.Crit("failed to validate clients", "error", err)
-			return err
+			return true, err
 		}
 	}
 	if *simulatorPattern != "" {
 		if err := makeGenesisDAG(daemon); err != nil {
 			log15.Crit("failed generate DAG for simulations", "error", err)
-			return err
+			return true, err
 		}
-		if err := simulateClients(daemon, *clientPattern, *simulatorPattern, overrides); err != nil {
+		failed, err := simulateClients(daemon, *clientPattern, *simulatorPattern, overrides);
+		anyFailed = failed || anyFailed;
+		if err != nil {
 			log15.Crit("failed to simulate clients", "error", err)
-			return err
+			return true, err
 		}
 	}
 	if *benchmarkPattern != "" {
 		if err := benchmarkClients(daemon, *clientPattern, *benchmarkPattern, overrides); err != nil {
 			log15.Crit("failed to benchmark clients", "error", err)
-			return err
+			return true, err
 		}
 	}
-	return nil
+	return anyFailed, nil
 }

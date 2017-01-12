@@ -16,21 +16,22 @@ import (
 
 // validateClients runs a batch of validation tests matched by validatorPattern
 // against all clients matching clientPattern.
-func validateClients(daemon *docker.Client, clientPattern, validatorPattern string, overrides []string) error {
+func validateClients(daemon *docker.Client, clientPattern, validatorPattern string, overrides []string) (bool, error) {
 	// Build all the clients matching the validation pattern
 	log15.Info("building clients for validation", "pattern", clientPattern)
 	clients, err := buildClients(daemon, clientPattern)
 	if err != nil {
-		return err
+		return false, err
 	}
 	// Build all the validators known to the test harness
 	log15.Info("building validators for testing", "pattern", validatorPattern)
 	validators, err := buildValidators(daemon, validatorPattern)
 	if err != nil {
-		return err
+		return false, err
 	}
 	// Iterate over all client and validator combos and cross-execute them
 	results := make(map[string]map[string][]string)
+	anyFailed := false
 
 	for client, clientImage := range clients {
 		results[client] = make(map[string][]string)
@@ -46,6 +47,7 @@ func validateClients(daemon *docker.Client, clientPattern, validatorPattern stri
 				logger.Info("validation passed", "time", time.Since(start))
 				results[client]["pass"] = append(results[client]["pass"], validator)
 			} else {
+				anyFailed = true
 				logger.Error("validation failed", "time", time.Since(start))
 				fail := validator
 				if err != nil {
@@ -59,7 +61,7 @@ func validateClients(daemon *docker.Client, clientPattern, validatorPattern stri
 	out, _ := json.MarshalIndent(results, "", "  ")
 	fmt.Printf("Validation results:\n%s\n", string(out))
 
-	return nil
+	return anyFailed, nil
 }
 
 func validate(daemon *docker.Client, client, validator string, overrides []string, logger log15.Logger, logdir string) (bool, error) {
