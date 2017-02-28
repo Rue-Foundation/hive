@@ -47,7 +47,7 @@ if [ "$HIVE_NODETYPE" == "light" ]; then
     echo "Missing --light impl"
 fi
 
-# Override any chain configs in the geth/Harmony specific way
+# Override any chain configs in the go-ethereum specific way
 chainconfig="{}"
 if [ "$HIVE_FORK_HOMESTEAD" != "" ]; then
 	chainconfig=`echo $chainconfig | jq ". + {\"homesteadBlock\": $HIVE_FORK_HOMESTEAD}"`
@@ -61,6 +61,15 @@ fi
 if [ "$HIVE_FORK_DAO_VOTE" == "1" ]; then
 	chainconfig=`echo $chainconfig | jq ". + {\"daoForkSupport\": true}"`
 fi
+
+if [ "$HIVE_FORK_TANGERINE" != "" ]; then
+	chainconfig=`echo $chainconfig | jq ". + {\"eip150Block\": $HIVE_FORK_TANGERINE}"`
+fi
+if [ "$HIVE_FORK_SPURIOUS" != "" ]; then
+	chainconfig=`echo $chainconfig | jq ". + {\"eip158Block\": $HIVE_FORK_SPURIOUS}"`
+	chainconfig=`echo $chainconfig | jq ". + {\"eip155Block\": $HIVE_FORK_SPURIOUS}"`
+fi
+
 if [ "$chainconfig" != "{}" ]; then
 	genesis=`cat /genesis.json` && echo $genesis | jq ". + {\"config\": $chainconfig}" > /genesis.json
 fi

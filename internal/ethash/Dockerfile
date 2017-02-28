@@ -70,9 +70,11 @@ echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.c
 # Build Harmony on the fly and delete all build tools afterwards
 RUN \
   apk add --update git                                                && \
-  git clone -b develop https://github.com/ether-camp/ethereum-harmony.git && \
-  git clone -b feature/hive-simulation-tests https://github.com/ethereum/ethereumj.git && \
+
+  git clone -b feature/hive-consensus-tests https://github.com/cupuyc/ethereumj.git && \
   (cd \ethereumj && ./gradlew install -x test)
+
+  # git clone -b develop https://github.com/ether-camp/ethereum-harmony.git && \
   # && \
   #(cd \ethereum-harmony && ./gradlew build -x test -PuseMavenLocal)
 
