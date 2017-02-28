@@ -76,10 +76,14 @@ echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.c
 RUN \
   apk add --update git                                                && \
   git clone -b develop https://github.com/ether-camp/ethereum-harmony.git && \
-  git clone -b feature/hive-simulation-tests https://github.com/ethereum/ethereumj.git && \
+  git clone -b feature/hive-consensus-tests https://github.com/cupuyc/ethereumj.git && \
   (cd \ethereumj && ./gradlew install -x test) && \
   (cd \ethereum-harmony && ./gradlew build -x test -PuseMavenLocal)
 
+
+RUN echo "Gradle location: $HOME/.gradle"
+RUN echo "Root dir content:"
+RUN echo `ls /`
 
 # Make sure bash and jq is available for easier wrapper implementation
 RUN apk add --update bash jq

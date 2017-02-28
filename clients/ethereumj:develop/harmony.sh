@@ -22,6 +22,7 @@
 # Immediately abort the script on any error encountered
 set -e
 
+cd /ethereumj && git checkout feature/hive-consensus-tests
 cd /ethereumj && git pull
 cd /ethereumj && ./gradlew install -x test
 cd /ethereum-harmony && git pull
@@ -49,7 +50,7 @@ if [ "$HIVE_NODETYPE" == "light" ]; then
     echo "Missing --light impl"
 fi
 
-# Override any chain configs in the geth/Harmony specific way
+# Override any chain configs in the go-ethereum specific way
 chainconfig="{}"
 if [ "$HIVE_FORK_HOMESTEAD" != "" ]; then
 	chainconfig=`echo $chainconfig | jq ". + {\"homesteadBlock\": $HIVE_FORK_HOMESTEAD}"`
@@ -63,6 +64,15 @@ fi
 if [ "$HIVE_FORK_DAO_VOTE" == "1" ]; then
 	chainconfig=`echo $chainconfig | jq ". + {\"daoForkSupport\": true}"`
 fi
+
+if [ "$HIVE_FORK_TANGERINE" != "" ]; then
+	chainconfig=`echo $chainconfig | jq ". + {\"eip150Block\": $HIVE_FORK_TANGERINE}"`
+fi
+if [ "$HIVE_FORK_SPURIOUS" != "" ]; then
+	chainconfig=`echo $chainconfig | jq ". + {\"eip158Block\": $HIVE_FORK_SPURIOUS}"`
+	chainconfig=`echo $chainconfig | jq ". + {\"eip155Block\": $HIVE_FORK_SPURIOUS}"`
+fi
+
 if [ "$chainconfig" != "{}" ]; then
 	genesis=`cat /genesis.json` && echo $genesis | jq ". + {\"config\": $chainconfig}" > /genesis.json
 fi
@@ -91,7 +101,7 @@ if [ -f /chain.rlp ]; then
     echo "importBlocks options: $HARMONY_ETHER_CAMP_OPTS"
 
     cd /ethereum-harmony
-    ./gradlew importBlocks $HARMONY_ETHER_CAMP_OPTS
+    ./gradlew importBlocks $HARMONY_ETHER_CAMP_OPTS -PuseMavenLocal
 fi
 
 # Load the remainder of the test chain
@@ -100,7 +110,7 @@ if [ -d /blocks ]; then
     for block in `ls /blocks | sort -n`; do
         export HARMONY_ETHER_CAMP_OPTS="$FLAGS -Dblocks.format=rlp -Dblocks.loader=/blocks/$block"
 		cd /ethereum-harmony
-        ./gradlew importBlocks $HARMONY_ETHER_CAMP_OPTS
+        ./gradlew importBlocks $HARMONY_ETHER_CAMP_OPTS -PuseMavenLocal
 	done
 fi
 
@@ -124,7 +134,7 @@ fi
 
 # Run the peer implementation with the requested flags
 echo "Parameters $FLAGS"
-echo "Running Harmony..."
+echo "Running Harmony Develop..."
 cd /ethereum-harmony
 ./gradlew bootRun $FLAGS -PuseMavenLocal
 

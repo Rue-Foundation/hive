@@ -162,6 +162,10 @@ The behavioral configuration variables:
   * `HIVE_FORK_HOMESTEAD` the block number of the Ethereum Homestead transition
   * `HIVE_FORK_DAO_BLOCK` the block number of the DAO hard-fork transition
   * `HIVE_FORK_DAO_VOTE` whether the node supports or opposes the DAO hard-fork
+  * `HIVE_FORK_TANGERINE` the block number of the Ethereum TangerineWhistle transition
+    * The HF for repricing certain opcodes, EIP 150
+  * `HIVE_FORK_SPURIOUS` the block number of the Ethereum Homestead transition
+    * The HF for replay protection, state cleaning etc. EIPs 155,160,161. 
   * `HIVE_MINER` address to credit with mining rewards (if set, start mining)
   * `HIVE_MINER_EXTRA` extra-data field to set for newly minted blocks
 
@@ -201,9 +205,11 @@ Validation results:
 Simulation results:
 {
   "go-ethereum:master": {
-    "pass": [
-      "smoke/single-node"
-    ]
+    "smoke/lifecycle": {
+      "start": "2017-01-31T09:20:16.975219924Z",
+      "end": "2017-01-31T09:20:18.705302536Z",
+      "success": true
+    }
   }
 }
 ```
@@ -345,7 +351,7 @@ it with the necessary mechanisms to create any scenario it wants.
 
 To this effect, `hive` exposes a RESTful HTTP API that all simulators can use to direct how `hive`
 should create and organize the simulated network. This API is exposed at the HTTP endpoint set in the
-`HIVE_SIMULATOR` environmental variable. The currently available API endpoints are:
+`HIVE_SIMULATOR` environmental variable. The currently available topology endpoints are:
 
  * `/nodes` with method `POST` boots up a new client instance, returning its unique ID
    * Simulators may override any [chain init files](#initializing-the-client) via `URL` and `form` parameters (see below)
@@ -353,6 +359,8 @@ should create and organize the simulated network. This API is exposed at the HTT
  * `/nodes/$ID` with method `GET` retrieves the IP address of an existing client instance
    * The client's exposed services can be reached via ports `8545`, `8546` and `30303`
  * `/nodes/$ID` with method `DELETE` instantly terminates an existing client instance
+ * `/log` with method `POST` sends a logging message from the simulator to the main process.
+ 
 
 Overriding environmental variables that change client behaviors via HTTP parameters is easy to do in
 any HTTP client utility and/or library, but uploading files needed for chain initializations is much
@@ -377,7 +385,45 @@ The simulation will be considered successful if and only if the exit code of the
 is zero! Any output that the simulator generates will be saved to an appropriate log file in the `hive`
 workspace folder and also echoed out to the console on `--loglevel=6`.
 
-Closing notes:
+#### Reporting sub-results
+
+It may happen that the setup/teardown cost of a simulation be large enough to warrant validating not
+just one, but perhaps multiple invariants in the same test. Although the results for these subtests
+could be reported in the log file, retrieving them would become unwieldy. As such, `hive` exposes a
+special HTTP endpoint on its RESTful API that can add sub-results to a single simulation. The endpoint
+resides at `/subresults` and has the following parameters:
+
+ * `name`: textual name to report for the subtest
+ * `success`: boolean flag (`true` or `false`) representing whether the subtest failed
+ * `error`: textual details for the reason behind the subtest failing
+ * `details`: structured JSON object containing arbitrary extra infos to surface
+
+For example, doing a call to this endpoint with curl:
+
+```
+$ curl -sf -v -X POST -F 'details={"Preconditions failed": ["nonce 1 != 2", "balance 0"]}' \
+  "$HIVE_SIMULATOR/subresults?name=Demo%20error&success=false&error=Something%20went%20wrong..."
+```
+
+will result a `subresults` field
+
+```json
+"subresults": [
+  {
+    "name": "Demo error",
+    "success": false,
+    "error": "Something went wrong...",
+    "details": {
+      "Preconditions failed": [
+        "nonce 1 != 2",
+        "balance 0"
+      ]
+    }
+  }
+]
+```
+
+### Closing notes
 
  * There is no constraint on how much time a simulation may run, but please be considerate.
  * The simulator doesn't have to terminate nodes itself, upon exit all resources are reclaimed.

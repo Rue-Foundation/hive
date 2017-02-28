@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
 	"os"
 	"strings"
 
@@ -49,14 +51,12 @@ func main() {
 	}
 	// Depending on the flags, either run hive in place or in an outer container shell
 	var fail error
-	var anyFailed bool
-
 	if *noShellContainer {
-		anyFailed, fail = mainInHost(daemon, overrides)
+		fail = mainInHost(daemon, overrides)
 	} else {
 		fail = mainInShell(daemon, overrides)
 	}
-	if fail != nil || anyFailed {
+	if fail != nil {
 		os.Exit(-1)
 	}
 }
@@ -64,55 +64,60 @@ func main() {
 // mainInHost runs the actual hive validation, simulation and benchmarking on the
 // host machine itself. This is usually the path executed within an outer shell
 // container, but can be also requested directly.
-func mainInHost(daemon *docker.Client, overrides []string) (bool, error) {
-	// Smoke tests are exclusive with all other flags
-	var anyFailed bool
+func mainInHost(daemon *docker.Client, overrides []string) error {
+	results := struct {
+		Validations map[string]map[string]*validationResult `json:"validations,omitempty"`
+		Simulations map[string]map[string]*simulationResult `json:"simulations,omitempty"`
+		Benchmarks  map[string]map[string]*benchmarkResult  `json:"benchmarks,omitempty"`
+	}{}
+	var err error
 
+	// Smoke tests are exclusive with all other flags
 	if *smokeFlag {
-		failed, err := validateClients(daemon, *clientPattern, "smoke/", overrides);
-		anyFailed = failed || anyFailed;
-		if err != nil {
+		if results.Validations, err = validateClients(daemon, *clientPattern, "smoke/", overrides); err != nil {
 			log15.Crit("failed to smoke-validate client images", "error", err)
-			return true, err
+			return err
 		}
-		failed, err = simulateClients(daemon, *clientPattern, "smoke/", overrides);
-		anyFailed = failed || anyFailed;
-		if err != nil {
+		if results.Simulations, err = simulateClients(daemon, *clientPattern, "smoke/", overrides); err != nil {
 			log15.Crit("failed to smoke-simulate client images", "error", err)
-			return true, err
+			return err
 		}
-		if err := benchmarkClients(daemon, *clientPattern, "smoke/", overrides); err != nil {
+		if results.Benchmarks, err = benchmarkClients(daemon, *clientPattern, "smoke/", overrides); err != nil {
 			log15.Crit("failed to smoke-benchmark client images", "error", err)
-			return true, err
+			return err
 		}
-		return anyFailed, nil
-	}
-	// Otherwise run all requested validation and simulation tests
-	if *validatorPattern != "" {
-		failed, err := validateClients(daemon, *clientPattern, *validatorPattern, overrides);
-		anyFailed = failed || anyFailed;
-		if err != nil {
-			log15.Crit("failed to validate clients", "error", err)
-			return true, err
+	} else {
+		// Otherwise run all requested validation and simulation tests
+		if *validatorPattern != "" {
+			if results.Validations, err = validateClients(daemon, *clientPattern, *validatorPattern, overrides); err != nil {
+				log15.Crit("failed to validate clients", "error", err)
+				return err
+			}
 		}
-	}
-	if *simulatorPattern != "" {
-		if err := makeGenesisDAG(daemon); err != nil {
-			log15.Crit("failed generate DAG for simulations", "error", err)
-			return true, err
+		if *simulatorPattern != "" {
+			if err = makeGenesisDAG(daemon); err != nil {
+				log15.Crit("failed generate DAG for simulations", "error", err)
+				return err
+			}
+			if results.Simulations, err = simulateClients(daemon, *clientPattern, *simulatorPattern, overrides); err != nil {
+				log15.Crit("failed to simulate clients", "error", err)
+				return err
+			}
 		}
-		failed, err := simulateClients(daemon, *clientPattern, *simulatorPattern, overrides);
-		anyFailed = failed || anyFailed;
-		if err != nil {
-			log15.Crit("failed to simulate clients", "error", err)
-			return true, err
-		}
-	}
-	if *benchmarkPattern != "" {
-		if err := benchmarkClients(daemon, *clientPattern, *benchmarkPattern, overrides); err != nil {
-			log15.Crit("failed to benchmark clients", "error", err)
-			return true, err
+		if *benchmarkPattern != "" {
+			if results.Benchmarks, err = benchmarkClients(daemon, *clientPattern, *benchmarkPattern, overrides); err != nil {
+				log15.Crit("failed to benchmark clients", "error", err)
+				return err
+			}
 		}
 	}
-	return anyFailed, nil
+	// Flatten the results and print them in JSON form
+	out, err := json.MarshalIndent(results, "", "  ")
+	if err != nil {
+		log15.Crit("failed to report results", "error", err)
+		return err
+	}
+	fmt.Println(string(out))
+
+	return nil
 }
