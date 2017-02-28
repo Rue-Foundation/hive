@@ -16,7 +16,7 @@
 FROM docker:dind
 
 # Configure the container for building hive
-RUN apk add --update go && rm -rf /var/cache/apk/*
+RUN apk add --update musl-dev go && rm -rf /var/cache/apk/*
 ENV GOPATH /gopath
 ENV PATH   $GOPATH/bin:$PATH
 
@@ -53,4 +53,4 @@ RUN \
 ENTRYPOINT ["hive.sh"]
 
 # Inject all other runtime resources (modified most frequently)
-ADD . $GOPATH/src/github.com/karalabe/hive
+COPY . $GOPATH/src/github.com/karalabe/hive
