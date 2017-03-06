@@ -22,7 +22,7 @@
 # Immediately abort the script on any error encountered
 set -e
 
-cd /ethereumj && git checkout feature/hive-consensus-tests
+cd /ethereumj && git checkout develop
 cd /ethereumj && git pull
 cd /ethereumj && ./gradlew install -x test
 cd /ethereum-harmony && git pull
@@ -37,7 +37,7 @@ fi
 
 # If the client is to be run in testnet mode, flag it as such
 if [ "$HIVE_TESTNET" == "1" ]; then
-	FLAGS="$FLAGS -Dblockchain.config.name=morden"
+	FLAGS="$FLAGS -Dblockchain.config.name=ropsten"
 fi
 
 # Handle any client mode or operation requests

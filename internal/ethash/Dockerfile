@@ -71,7 +71,7 @@ echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.c
 RUN \
   apk add --update git                                                && \
 
-  git clone -b feature/hive-consensus-tests https://github.com/cupuyc/ethereumj.git && \
+  git clone -b develop https://github.com/ethereum/ethereumj.git && \
   (cd \ethereumj && ./gradlew install -x test)
 
   # git clone -b develop https://github.com/ether-camp/ethereum-harmony.git && \
