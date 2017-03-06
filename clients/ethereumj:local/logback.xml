@@ -53,7 +53,7 @@
     <logger level="INFO" name="org.springframework.web.servlet.DispatcherServlet"/>
     <logger level="DEBUG" name="com.ethercamp.harmony"/>
     <logger level="ERROR" name="blockchain"/>
-    <logger level="ERROR" name="blockqueue"/>
+    <logger level="INFO" name="blockqueue"/>
     <logger level="INFO" name="ethereum-service"/>
     <logger level="INFO" name="report"/>
     <logger level="ERROR" name="general"/>
@@ -73,7 +73,7 @@
     <logger level="TRACE" name="notification"/>
     <logger level="ERROR" name="wallet"/>
     <logger level="INFO" name="net"/>
-    <logger level="INFO" name="db"/>
+    <logger level="WARN" name="db"/>
     <logger level="ERROR" name="peerdiscovery"/>
     <logger level="ERROR" name="peermonitor"/>
     <logger level="ERROR" name="java.nio"/>
