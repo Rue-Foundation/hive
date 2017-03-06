@@ -3,7 +3,7 @@
 # The build process it potentially longer running but every effort was made to
 # produce a very minimalistic container that can be reused many times without
 # needing to constantly rebuild.
-FROM alpine:3.4
+FROM alpine:latest
 
 ENV JAVA_VERSION_MAJOR=8 \
     JAVA_VERSION_MINOR=102 \

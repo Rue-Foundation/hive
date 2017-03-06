@@ -6,7 +6,7 @@
 #FROM n3ziniuka5/ubuntu-oracle-jdk:16.04-JDK8
 #FROM frolvlad/alpine-oraclejdk8:slim         # alpine has issues running leveldb native
 
-FROM alpine:3.4
+FROM alpine:latest
 
 ENV JAVA_VERSION_MAJOR=8 \
     JAVA_VERSION_MINOR=102 \
@@ -77,7 +77,7 @@ echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.c
 
 # Make sure bash and jq is available for easier wrapper implementation
 #RUN apt-get install bash
-RUN apk add --update bash jq
+RUN apk add --update bash jq ca-certificates linux-headers
 
 # Inject the startup script
 ADD harmony.sh /harmony.sh
